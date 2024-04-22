@@ -1,0 +1,31 @@
+{
+  "name": "nextjs-smartcontract-lottery-fcc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@coinbase/wallet-sdk": "^3.7.2",
+    "@mailchain/sdk": "^0.31.0",
+    "@walletconnect/web3-provider": "^1.8.0",
+    "ethers": "^5.5.4",
+    "moralis": "^2.26.1",
+    "next": "12.1.5",
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
+    "react-moralis": "^1.4.2",
+    "web3modal": "^1.9.12",
+    "web3uikit": "^0.1.159"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.4",
+    "eslint": "8.13.0",
+    "eslint-config-next": "12.1.5",
+    "postcss": "^8.4.12",
+    "tailwindcss": "^3.0.24"
+  }
+}

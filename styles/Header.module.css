@@ -1,0 +1,98 @@
+.Header {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #f0f0f0;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.logo img {
+  max-height: 50px; /* Adjust as needed */
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+}
+
+.headerTitle {
+  margin-left: 20px;
+}
+
+.connectButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.connect-link,
+.disconnect-button {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none; /* Remove underline for links */
+  color: #007bff; /* Default link color */
+}
+
+.connect-link:hover,
+.disconnect-button:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.links {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px; /* Added margin to separate from main content */
+}
+
+.links a {
+  text-decoration: none; /* Remove underline for links */
+  color: #007bff; /* Default link color */
+}
+
+.links a:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.menuItem {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: none;
+  min-width: 200px; /* Adjust width as needed */
+}
+
+.menuItem:hover .dropdown {
+  display: block;
+}
+
+.dropdown a {
+  display: block;
+  padding: 8px 12px;
+  color: #333;
+  text-decoration: none;
+}
+
+.dropdown a:hover {
+  background-color: #f0f0f0;
+}
