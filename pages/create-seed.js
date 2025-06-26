@@ -5,16 +5,15 @@ import Web3Modal from "web3modal";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { abi } from "../constants/abi";
 import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 import Header from "../components/Header.js";
-import CreateSnowball from "../components/CreateSnowball.js";
+import CreateSeed from "../components/CreateSeed.js";
 import LanguageHamburger from "../components/LanguageHamburger.js";
 
 export default function sell() {
   return (
     <div>
-      <CreateSnowball />
+      <CreateSeed />
     </div>
   );
 }

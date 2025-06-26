@@ -1,0 +1,101 @@
+.container {
+    padding: 0 2rem;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eaeaea;
+  }
+  
+  .content {
+    display: flex;
+    padding: 4rem 0;
+  }
+  
+  .sidebar {
+    width: 25%;
+    padding: 2rem;
+    border-right: 1px solid #eaeaea;
+  }
+  
+  .sidebar h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .sidebarList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebarList li {
+    margin-bottom: 1rem;
+  }
+  
+  .sidebarList a {
+    text-decoration: none;
+    color: #0070f3;
+  }
+  
+  .sidebarList a:hover {
+    text-decoration: underline;
+  }
+  
+  .main {
+    width: 75%;
+    padding: 2rem;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .description {
+    margin: 1rem 0;
+    line-height: 1.5;
+    font-size: 1.2rem;
+  }
+  
+  .description a {
+    color: #0070f3;
+    font-size: 1.2rem; /* Adjust the size as needed */
+  }
+  
+  .description a:hover {
+    text-decoration: underline;
+  }
+  
+  .imageContainer {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  
+  .imageContainer em {
+    display: block;
+    margin-top: 0.5rem;
+  }
+  
+  .features {
+    list-style-type: disc;
+    margin: 1rem 0 1rem 2rem;
+    font-size: 1.2rem;
+    line-height: 1.8;
+  }
+  
+  .features li {
+    margin-bottom: 1rem;
+  }
+  
+  .footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+    border-top: 1px solid #eaeaea;
+  }
+  

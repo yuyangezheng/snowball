@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import styles from "../styles/CreateSnowball.module.css";
-import DisplaySnowball from "./DisplaySnowball";
-import SnowballReceiptDetails from "./SnowballReceiptDetails";
+import DisplayDrawing from "./DisplayDrawing";
+import DrawingReceiptDetails from "./DrawingReceiptDetails";
 import { useWeb3Contract } from "react-moralis";
 import {
   snowballManagerABI,
@@ -14,27 +14,28 @@ import {
 import { WalletContext } from "../pages/_app";
 import { ethers } from "ethers";
 
-const SearchSnowball = () => {
+const SearchDrawing = () => {
   const [ID, setID] = useState(null);
   const [display, setDisplay] = useState(false);
-  const [receiptIds, setReceiptIds] = useState([]);
+  const [receiptIds, setReceiptIds] = useState([]); // State to store receipt IDs
+  const [loading, setLoading] = useState(false); // State to manage loading
   const [selectedIds, setSelectedIds] = useState([]); // State for selected receipt IDs
-  const [loading, setLoading] = useState(false);
   const [redeeming, setRedeeming] = useState(false); // State for redeeming action
 
-  const [wallet] = useContext(WalletContext);
+  const [wallet] = useContext(WalletContext); // Get wallet context
 
-  const { runContractFunction: getTokens, error } = useWeb3Contract({
-    abi: snowballManagerABI,
-    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+  // Fetch tokens of promotions (receipt IDs) based on the Snowball ID
+  const { runContractFunction: getTokens } = useWeb3Contract({
+    abi: drawingManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.drawingManager[0],
     functionName: "getPromotionReceipts",
     params: { promotionID: ID },
   });
 
-  const { runContractFunction: redeemSnowballReceipts } = useWeb3Contract({
-    abi: snowballManagerABI,
-    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
-    functionName: "redeemSnowballReceipts",
+  const { runContractFunction: redeemDrawingReceipts } = useWeb3Contract({
+    abi: drawingManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.drawingManager[0],
+    functionName: "redeemDrawingReceipts",
     params: { receiptIDs: selectedIds },
   });
 
@@ -44,19 +45,24 @@ const SearchSnowball = () => {
     setID(newID);
     setDisplay(true);
 
-    setLoading(true);
+    setLoading(true); // Set loading state
 
     try {
-      const result = await getTokens();
-      console.log(result);
+      const result = await getTokens(); // Run the getTokens function
+      console.log(ID);
+      console.log(newID);
+      console.log("Receipt IDs fetched:", result);
+
+      // Convert the BigNumber receipt IDs to regular integers
       const receiptIdsArray = result.map((receiptId) =>
         parseInt(receiptId.toString(), 10)
       );
-      setReceiptIds(receiptIdsArray);
+
+      setReceiptIds(receiptIdsArray); // Update state with receipt IDs
     } catch (error) {
       console.error("Error fetching receipt IDs:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -65,7 +71,7 @@ const SearchSnowball = () => {
 
     setRedeeming(true);
     try {
-      await redeemSnowballReceipts();
+      await redeemDrawingReceipts();
       alert("Receipts redeemed successfully!");
       setSelectedIds([]); // Clear selected receipts after redemption
     } catch (error) {
@@ -76,6 +82,8 @@ const SearchSnowball = () => {
     }
   };
 
+  const isSelected = (receiptId) => selectedIds.includes(receiptId);
+
   const toggleSelection = (receiptId) => {
     setSelectedIds((prev) =>
       prev.includes(receiptId)
@@ -84,13 +92,11 @@ const SearchSnowball = () => {
     );
   };
 
-  const isSelected = (receiptId) => selectedIds.includes(receiptId);
-
   return (
     <div className={styles.container}>
-      <h1>View Snowball Details Via ID Number</h1>
+      <h1>View Drawing Details Via ID Number</h1>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <label>Enter a Snowball ID</label>
+        <label>Enter a Drawing ID</label>
         <input
           type="text"
           name="Id"
@@ -106,8 +112,11 @@ const SearchSnowball = () => {
           {loading ? "Loading..." : "Check Snowball Status!"}
         </button>
       </form>
-      Display Snowball Details
-      {display && <DisplaySnowball SnowballID={ID} />}
+
+      {/* Display Drawing Details */}
+      {display && <DisplayDrawing DrawingID={ID} />}
+
+      {/* Display ReceiptDetails components based on the fetched receipt IDs */}
       {receiptIds.length > 0 && (
         <div className={styles.receiptsContainer}>
           <h2>Associated Receipts:</h2>
@@ -127,11 +136,13 @@ const SearchSnowball = () => {
                 margin: "5px",
               }}
             >
-              <SnowballReceiptDetails receiptId={receiptId} />
+              <DrawingReceiptDetails receiptId={receiptId} />
             </div>
           ))}
         </div>
       )}
+
+      {/* Batch Submit Button */}
       {selectedIds.length > 0 && (
         <button
           className={styles.batchSubmitButton}
@@ -145,4 +156,4 @@ const SearchSnowball = () => {
   );
 };
 
-export default SearchSnowball;
+export default SearchDrawing;

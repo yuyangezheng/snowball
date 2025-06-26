@@ -96,3 +96,9 @@
 .dropdown a:hover {
   background-color: #f0f0f0;
 }
+
+/* styles/Header.module.css */
+
+.logoImage {
+  cursor: pointer;
+}

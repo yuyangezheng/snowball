@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import styles from "../styles/CreateSnowball.module.css";
-import DisplaySnowball from "./DisplaySnowball";
-import SnowballReceiptDetails from "./SnowballReceiptDetails";
+import DisplaySeed from "./DisplaySeed";
+import SeedReceiptDetails from "./SeedReceiptDetails";
 import { useWeb3Contract } from "react-moralis";
 import {
   snowballManagerABI,
@@ -14,7 +14,7 @@ import {
 import { WalletContext } from "../pages/_app";
 import { ethers } from "ethers";
 
-const SearchSnowball = () => {
+const SearchSeed = () => {
   const [ID, setID] = useState(null);
   const [display, setDisplay] = useState(false);
   const [receiptIds, setReceiptIds] = useState([]);
@@ -25,16 +25,16 @@ const SearchSnowball = () => {
   const [wallet] = useContext(WalletContext);
 
   const { runContractFunction: getTokens, error } = useWeb3Contract({
-    abi: snowballManagerABI,
-    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+    abi: seedManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.seedManager[0],
     functionName: "getPromotionReceipts",
     params: { promotionID: ID },
   });
 
-  const { runContractFunction: redeemSnowballReceipts } = useWeb3Contract({
-    abi: snowballManagerABI,
-    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
-    functionName: "redeemSnowballReceipts",
+  const { runContractFunction: redeemSeedReceipts } = useWeb3Contract({
+    abi: seedManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.seedManager[0],
+    functionName: "redeemSeedReceipts",
     params: { receiptIDs: selectedIds },
   });
 
@@ -65,7 +65,7 @@ const SearchSnowball = () => {
 
     setRedeeming(true);
     try {
-      await redeemSnowballReceipts();
+      await redeemSeedReceipts();
       alert("Receipts redeemed successfully!");
       setSelectedIds([]); // Clear selected receipts after redemption
     } catch (error) {
@@ -88,9 +88,9 @@ const SearchSnowball = () => {
 
   return (
     <div className={styles.container}>
-      <h1>View Snowball Details Via ID Number</h1>
+      <h1>View Seed Details Via ID Number</h1>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <label>Enter a Snowball ID</label>
+        <label>Enter a Seed ID</label>
         <input
           type="text"
           name="Id"
@@ -103,11 +103,11 @@ const SearchSnowball = () => {
           className={styles.submitButton}
           disabled={loading}
         >
-          {loading ? "Loading..." : "Check Snowball Status!"}
+          {loading ? "Loading..." : "Check Seed Status!"}
         </button>
       </form>
-      Display Snowball Details
-      {display && <DisplaySnowball SnowballID={ID} />}
+      Display Seed Details
+      {display && <DisplaySeed SeedID={ID} />}
       {receiptIds.length > 0 && (
         <div className={styles.receiptsContainer}>
           <h2>Associated Receipts:</h2>
@@ -127,7 +127,7 @@ const SearchSnowball = () => {
                 margin: "5px",
               }}
             >
-              <SnowballReceiptDetails receiptId={receiptId} />
+              <SeedReceiptDetails receiptId={receiptId} />
             </div>
           ))}
         </div>
@@ -145,4 +145,4 @@ const SearchSnowball = () => {
   );
 };
 
-export default SearchSnowball;
+export default SearchSeed;

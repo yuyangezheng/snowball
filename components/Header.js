@@ -8,6 +8,7 @@ import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 import LanguageHamburger from "./LanguageHamburger";
 import { useMoralis } from "react-moralis";
 import { WalletContext } from "../pages/_app";
+import Link from "next/link";
 
 let web3Modal;
 
@@ -47,6 +48,7 @@ export default function Header() {
   const [showAboutDropdown, setShowAboutDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [showCommunityDropdown, setShowCommunityDropdown] = useState(false);
+  const [showSellDropdown, setShowSellDropdown] = useState(false);
 
   const connectWallet = async () => {
     try {
@@ -133,30 +135,43 @@ export default function Header() {
     setShowCommunityDropdown(!showCommunityDropdown);
   };
 
+  const toggleSellDropdown = () => {
+    setShowSellDropdown(!showSellDropdown);
+  };
+
   const closeDropdowns = () => {
     setShowAboutDropdown(false);
     setShowShopDropdown(false);
     setShowCommunityDropdown(false);
+    setShowSellDropdown(false);
   };
 
   return (
     <div className={styles.Header}>
       <div className={styles.headerTop}>
         <div className={styles.logo}>
-          {/* Assuming you have a logo */}
-          <img src="/logo.jpg" alt="Logo" />
+          {/* Using Link component for navigation */}
+          <Link href="/">
+            <img src="/logo.jpg" alt="Logo" className={styles.logoImage} />
+          </Link>
         </div>
         <div className={styles.headerContent}>
           <LanguageHamburger />
           <h1 className={styles.headerTitle}>
-            Welcome to the Snowball Protocol!
+            Welcome to Satsume. The best web3 ecommerce protocol since Last
+            Shop!
           </h1>
         </div>
         <div className={styles.connectButton}>
           {account ? (
             <>
               <div>Connection Status: Connected</div>
-              <div>Wallet Address: {account}</div>
+              <div>
+                Wallet Address:{" "}
+                <Link href={`/user/${account}`}>
+                  <a>{account}</a>
+                </Link>
+              </div>
               <button
                 className={styles["disconnect-button"]}
                 onClick={disconnect}
@@ -183,7 +198,9 @@ export default function Header() {
           {showShopDropdown && (
             <div className={styles.dropdown}>
               <a href="/media">Fulfilled by Snowball Media</a>
-              <a href="/listings">Ecosystem Listings</a>
+              <a href="/shop/listings">Ecosystem Listings</a>
+              <a href="/shop/receipts">Receipts</a>
+              <a href="/shop/permissions">Manage Permissions</a>
             </div>
           )}
         </div>
@@ -214,9 +231,29 @@ export default function Header() {
             </div>
           )}
         </div>
+
         <a href="/developers">Developers</a>
         <a href="/faq">FAQ</a>
-        <a href="/sell">Sell on Snowball</a>
+        <div
+          className={styles.menuItem}
+          onMouseEnter={toggleSellDropdown}
+          onMouseLeave={closeDropdowns}
+        >
+          <a href="#">Sell on Snowball</a>
+          {showSellDropdown && (
+            <div className={styles.dropdown}>
+              <a href="/sell-on-snowball-introduction">
+                Introduction To Snowball Protocol
+              </a>
+              <a href="/partner-with-snowball-media">
+                Partner with Snowball Media
+              </a>
+              <a href="/create-snowball">Create Snowball Promotion</a>
+              <a href="/create-drawing">Create Drawing Promotion</a>
+              <a href="/create-seed">Create Seed Promotion</a>
+            </div>
+          )}
+        </div>
         <a href="/finance">Snowball Finance</a>
       </div>
     </div>

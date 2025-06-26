@@ -3,7 +3,15 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "_usdcToken",
+        "name": "_receiptManagerAddress",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "_promotionsManagerAddress",
         "type": "address",
         "baseType": "address",
         "components": null,
@@ -27,20 +35,127 @@
   {
     "type": "error",
     "inputs": [],
-    "name": "Snowball_Expired"
+    "name": "NotCustomURI"
   },
   {
     "type": "error",
     "inputs": [],
-    "name": "TransferFail"
+    "name": "Promotion_Expired"
+  },
+  {
+    "type": "error",
+    "inputs": [],
+    "name": "URIAlreadSet"
   },
   {
     "type": "event",
     "inputs": [
       {
-        "name": "snowballId",
+        "name": "snowballID",
         "type": "uint256",
         "baseType": "uint256",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "numberOfParticipants",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "SnowballCancelled",
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "baseType": "address",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "erc20Token",
+        "type": "address",
+        "baseType": "address",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "maxSlots",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "endTime",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "thresholds",
+        "type": "uint256[]",
+        "baseType": "array",
+        "indexed": false,
+        "components": null,
+        "arrayLength": -1,
+        "arrayChildren": {
+          "name": "",
+          "type": "uint256",
+          "baseType": "uint256",
+          "components": null,
+          "arrayLength": null,
+          "arrayChildren": null
+        }
+      },
+      {
+        "name": "cohortPrices",
+        "type": "uint256[]",
+        "baseType": "array",
+        "indexed": false,
+        "components": null,
+        "arrayLength": -1,
+        "arrayChildren": {
+          "name": "",
+          "type": "uint256",
+          "baseType": "uint256",
+          "components": null,
+          "arrayLength": null,
+          "arrayChildren": null
+        }
+      },
+      {
+        "name": "mintsNFTS",
+        "type": "bool",
+        "baseType": "bool",
         "indexed": false,
         "components": null,
         "arrayLength": null,
@@ -51,75 +166,124 @@
     "anonymous": false
   },
   {
-    "type": "function",
+    "type": "event",
     "inputs": [
       {
         "name": "snowballID",
         "type": "uint256",
         "baseType": "uint256",
+        "indexed": true,
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       },
       {
-        "name": "debtAmount",
+        "name": "redeemedAmount",
         "type": "uint256",
         "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "debtOwner",
-        "type": "address",
-        "baseType": "address",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "loanID",
-        "type": "uint256",
-        "baseType": "uint256",
+        "indexed": false,
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       }
     ],
-    "name": "AddDebtToSnowball",
-    "constant": false,
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "payable": false,
-    "gas": null
+    "name": "SnowballCustodyRedeemed",
+    "anonymous": false
   },
   {
-    "type": "function",
-    "inputs": [],
-    "name": "ID",
-    "constant": true,
-    "outputs": [
+    "type": "event",
+    "inputs": [
       {
-        "name": "",
+        "name": "tokenID",
         "type": "uint256",
         "baseType": "uint256",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "redeemedAmount",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       }
     ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
+    "name": "SnowballReceiptRedeemed",
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "inputs": [
+      {
+        "name": "joiner",
+        "type": "address",
+        "baseType": "address",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": true,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "firstParticipantNumber",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "firstTokenID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "pricePaid",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "numTickets",
+        "type": "uint256",
+        "baseType": "uint256",
+        "indexed": false,
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "SnowballReceiptsMinted",
+    "anonymous": false
   },
   {
     "type": "function",
@@ -142,10 +306,7 @@
   },
   {
     "type": "function",
-    "inputs": [],
-    "name": "MINIMUM_PRICE",
-    "constant": true,
-    "outputs": [
+    "inputs": [
       {
         "name": "",
         "type": "uint256",
@@ -155,20 +316,21 @@
         "arrayChildren": null
       }
     ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [],
-    "name": "WCProviderAddress",
+    "name": "SnowballReceipts",
     "constant": true,
     "outputs": [
       {
-        "name": "",
-        "type": "address",
-        "baseType": "address",
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "effectivePricePaid",
+        "type": "uint256",
+        "baseType": "uint256",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
@@ -190,7 +352,83 @@
         "arrayChildren": null
       }
     ],
-    "name": "activeSnowballContractsByID",
+    "name": "Snowballs",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "maxSlots",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "endTime",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "returnedCustody",
+        "type": "bool",
+        "baseType": "bool",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "erc20Token",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "mintReceipts",
+        "type": "bool",
+        "baseType": "bool",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "addressToPromotions",
     "constant": true,
     "outputs": [
       {
@@ -208,8 +446,61 @@
   },
   {
     "type": "function",
-    "inputs": [],
-    "name": "bank",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "approvedOperators",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "baseType": "bool",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "arrayOfApprovedOperators",
     "constant": true,
     "outputs": [
       {
@@ -229,7 +520,7 @@
     "type": "function",
     "inputs": [
       {
-        "name": "totalAmount",
+        "name": "snowballID",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -237,7 +528,7 @@
         "arrayChildren": null
       }
     ],
-    "name": "calculateCommission",
+    "name": "calculateExcessSnowballCustody",
     "constant": true,
     "outputs": [
       {
@@ -255,8 +546,17 @@
   },
   {
     "type": "function",
-    "inputs": [],
-    "name": "checkUpkeep",
+    "inputs": [
+      {
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "cancelSnowball",
     "constant": false,
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -284,17 +584,28 @@
   },
   {
     "type": "function",
-    "inputs": [
+    "inputs": [],
+    "name": "contractOwner",
+    "constant": true,
+    "outputs": [
       {
-        "name": "_maxSlots",
-        "type": "uint256",
-        "baseType": "uint256",
+        "name": "",
+        "type": "address",
+        "baseType": "address",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
-      },
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
       {
-        "name": "_price",
+        "name": "_maxSlots",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -310,7 +621,7 @@
         "arrayChildren": null
       },
       {
-        "name": "_payouts",
+        "name": "_cohortPrices",
         "type": "uint256[]",
         "baseType": "array",
         "components": null,
@@ -338,28 +649,52 @@
           "arrayLength": null,
           "arrayChildren": null
         }
-      }
-    ],
-    "name": "createSnowball",
-    "constant": false,
-    "outputs": [
+      },
       {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
+        "name": "_owner",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "_erc20Token",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "_mintReceipts",
+        "type": "bool",
+        "baseType": "bool",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       }
     ],
-    "stateMutability": "payable",
-    "payable": true,
+    "name": "createSnowball",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
     "gas": null
   },
   {
     "type": "function",
-    "inputs": [],
-    "name": "failedTransferBalance",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "earnedCommissions",
     "constant": true,
     "outputs": [
       {
@@ -379,15 +714,7 @@
     "type": "function",
     "inputs": [
       {
-        "name": "snowballID",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "key",
+        "name": "promotionID",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -395,19 +722,47 @@
         "arrayChildren": null
       }
     ],
-    "name": "getCohortData",
+    "name": "getNumberOfParticipants",
     "constant": true,
     "outputs": [
       {
         "name": "",
-        "type": "address[]",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "promotionID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "getPromotionReceipts",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256[]",
         "baseType": "array",
         "components": null,
         "arrayLength": -1,
         "arrayChildren": {
           "name": "",
-          "type": "address",
-          "baseType": "address",
+          "type": "uint256",
+          "baseType": "uint256",
           "components": null,
           "arrayLength": null,
           "arrayChildren": null
@@ -422,15 +777,15 @@
     "type": "function",
     "inputs": [
       {
-        "name": "id",
-        "type": "uint256",
-        "baseType": "uint256",
+        "name": "promotionOwner",
+        "type": "address",
+        "baseType": "address",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       }
     ],
-    "name": "getDebtTranches",
+    "name": "getPromotionsByOwner",
     "constant": true,
     "outputs": [
       {
@@ -477,35 +832,12 @@
         "arrayChildren": null
       },
       {
-        "name": "price",
+        "name": "endTime",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
-      },
-      {
-        "name": "duration",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "payouts",
-        "type": "uint256[]",
-        "baseType": "array",
-        "components": null,
-        "arrayLength": -1,
-        "arrayChildren": {
-          "name": "",
-          "type": "uint256",
-          "baseType": "uint256",
-          "components": null,
-          "arrayLength": null,
-          "arrayChildren": null
-        }
       },
       {
         "name": "thresholds",
@@ -523,22 +855,6 @@
         }
       },
       {
-        "name": "balance",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "numParticipants",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
         "name": "cohortPrices",
         "type": "uint256[]",
         "baseType": "array",
@@ -552,396 +868,6 @@
           "arrayLength": null,
           "arrayChildren": null
         }
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "snowballID",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "getSnowballLoans",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256[]",
-        "baseType": "array",
-        "components": null,
-        "arrayLength": -1,
-        "arrayChildren": {
-          "name": "",
-          "type": "uint256",
-          "baseType": "uint256",
-          "components": null,
-          "arrayLength": null,
-          "arrayChildren": null
-        }
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "getSnowballMetrics",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "address",
-        "baseType": "address",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "",
-        "type": "uint256[]",
-        "baseType": "array",
-        "components": null,
-        "arrayLength": -1,
-        "arrayChildren": {
-          "name": "",
-          "type": "uint256",
-          "baseType": "uint256",
-          "components": null,
-          "arrayLength": null,
-          "arrayChildren": null
-        }
-      },
-      {
-        "name": "",
-        "type": "uint256[]",
-        "baseType": "array",
-        "components": null,
-        "arrayLength": -1,
-        "arrayChildren": {
-          "name": "",
-          "type": "uint256",
-          "baseType": "uint256",
-          "components": null,
-          "arrayLength": null,
-          "arrayChildren": null
-        }
-      },
-      {
-        "name": "",
-        "type": "uint256[]",
-        "baseType": "array",
-        "components": null,
-        "arrayLength": -1,
-        "arrayChildren": {
-          "name": "",
-          "type": "uint256",
-          "baseType": "uint256",
-          "components": null,
-          "arrayLength": null,
-          "arrayChildren": null
-        }
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "getTrancheOwners",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "",
-        "type": "address[]",
-        "baseType": "array",
-        "components": null,
-        "arrayLength": -1,
-        "arrayChildren": {
-          "name": "",
-          "type": "address",
-          "baseType": "address",
-          "components": null,
-          "arrayLength": null,
-          "arrayChildren": null
-        }
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [],
-    "name": "getUSDCBalance",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "snowballID",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "tickets",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "joinContract",
-    "constant": false,
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [],
-    "name": "owner",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "baseType": "address",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "snowballID",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "payoutCohorts",
-    "constant": false,
-    "outputs": [
-      {
-        "name": "accumulatedPayout",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "performData",
-        "type": "bytes",
-        "baseType": "bytes",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "performUpkeep",
-    "constant": false,
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [],
-    "name": "s_forwarderAddress",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "baseType": "address",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "stateMutability": "view",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "s_idToSnowball",
-    "constant": true,
-    "outputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "maxSlots",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "price",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "duration",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      },
-      {
-        "name": "totalDebt",
-        "type": "uint256",
-        "baseType": "uint256",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
       },
       {
         "name": "owner",
@@ -952,23 +878,51 @@
         "arrayChildren": null
       },
       {
-        "name": "startTime",
-        "type": "uint256",
-        "baseType": "uint256",
+        "name": "returnedCustody",
+        "type": "bool",
+        "baseType": "bool",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       },
       {
-        "name": "numParticipants",
-        "type": "uint256",
-        "baseType": "uint256",
+        "name": "erc20Token",
+        "type": "address",
+        "baseType": "address",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       },
       {
-        "name": "balance",
+        "name": "mintReceipts",
+        "type": "bool",
+        "baseType": "bool",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "getSnowballPrice",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -984,15 +938,15 @@
     "type": "function",
     "inputs": [
       {
-        "name": "to",
-        "type": "address",
-        "baseType": "address",
+        "name": "snowballID",
+        "type": "uint256",
+        "baseType": "uint256",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
       },
       {
-        "name": "amount",
+        "name": "numOrders",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -1000,7 +954,7 @@
         "arrayChildren": null
       }
     ],
-    "name": "sendFailedFunds",
+    "name": "joinSnowball",
     "constant": false,
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -1011,7 +965,46 @@
     "type": "function",
     "inputs": [
       {
-        "name": "newBank",
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "promotionIDToReceiptIDs",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [],
+    "name": "promotionsManager",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
         "type": "address",
         "baseType": "address",
         "components": null,
@@ -1019,10 +1012,26 @@
         "arrayChildren": null
       }
     ],
-    "name": "setBank",
-    "constant": false,
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [],
+    "name": "promotionsManagerAddress",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
     "payable": false,
     "gas": null
   },
@@ -1030,7 +1039,38 @@
     "type": "function",
     "inputs": [
       {
-        "name": "forwarderAddress",
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "receiptIDToPromotionID",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [],
+    "name": "receiptManager",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
         "type": "address",
         "baseType": "address",
         "components": null,
@@ -1038,7 +1078,49 @@
         "arrayChildren": null
       }
     ],
-    "name": "setForwarderAddress",
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [],
+    "name": "receiptManagerAddress",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "stateMutability": "view",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "receiptIDs",
+        "type": "uint256[]",
+        "baseType": "array",
+        "components": null,
+        "arrayLength": -1,
+        "arrayChildren": {
+          "name": "",
+          "type": "uint256",
+          "baseType": "uint256",
+          "components": null,
+          "arrayLength": null,
+          "arrayChildren": null
+        }
+      }
+    ],
+    "name": "redeemSnowballReceipts",
     "constant": false,
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -1055,15 +1137,37 @@
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
-      },
+      }
+    ],
+    "name": "retrieveExcessSnowballCustody",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
       {
-        "name": "tranche",
+        "name": "newCommissionBPs",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null
-      },
+      }
+    ],
+    "name": "setCommission",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
       {
         "name": "newOwner",
         "type": "address",
@@ -1073,7 +1177,7 @@
         "arrayChildren": null
       }
     ],
-    "name": "setNewTrancheOwner",
+    "name": "setOwner",
     "constant": false,
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -1084,26 +1188,7 @@
     "type": "function",
     "inputs": [
       {
-        "name": "_WCProviderAddress",
-        "type": "address",
-        "baseType": "address",
-        "components": null,
-        "arrayLength": null,
-        "arrayChildren": null
-      }
-    ],
-    "name": "setWorkingCapitalProvider",
-    "constant": false,
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "payable": false,
-    "gas": null
-  },
-  {
-    "type": "function",
-    "inputs": [
-      {
-        "name": "",
+        "name": "promotionID",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -1111,7 +1196,72 @@
         "arrayChildren": null
       },
       {
-        "name": "",
+        "name": "newURIRoot",
+        "type": "string",
+        "baseType": "string",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "setPromotionURI",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "_promotionsManagerAddress",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "setPromotionsManager",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "_receiptManagerAddress",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "setReceiptManager",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
+      {
+        "name": "promotionID",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      },
+      {
+        "name": "basisPoints",
         "type": "uint256",
         "baseType": "uint256",
         "components": null,
@@ -1119,7 +1269,17 @@
         "arrayChildren": null
       }
     ],
-    "name": "snowballIDToLoanIDPerTranche",
+    "name": "setRoyalty",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [],
+    "name": "snowballIDs",
     "constant": true,
     "outputs": [
       {
@@ -1137,8 +1297,17 @@
   },
   {
     "type": "function",
-    "inputs": [],
-    "name": "snowballWorkingCapital",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "unmintedReceiptsToOwners",
     "constant": true,
     "outputs": [
       {
@@ -1156,14 +1325,42 @@
   },
   {
     "type": "function",
-    "inputs": [],
-    "name": "usdcToken",
-    "constant": true,
-    "outputs": [
+    "inputs": [
+      {
+        "name": "erc20Token",
+        "type": "address",
+        "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "withdrawCommissions",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  {
+    "type": "function",
+    "inputs": [
       {
         "name": "",
         "type": "address",
         "baseType": "address",
+        "components": null,
+        "arrayLength": null,
+        "arrayChildren": null
+      }
+    ],
+    "name": "withdrawnCommissions",
+    "constant": true,
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "baseType": "uint256",
         "components": null,
         "arrayLength": null,
         "arrayChildren": null

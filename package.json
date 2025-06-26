@@ -11,7 +11,9 @@
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.7.2",
     "@mailchain/sdk": "^0.31.0",
+    "@openzeppelin/contracts": "^5.0.2",
     "@walletconnect/web3-provider": "^1.8.0",
+    "base-64": "^1.0.0",
     "ethers": "^5.5.4",
     "moralis": "^2.26.1",
     "next": "12.1.5",

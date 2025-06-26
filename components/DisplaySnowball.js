@@ -1,8 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { WalletContext } from "../pages/_app";
 import { useWeb3Contract } from "react-moralis";
-import { abi, contractAddresses } from "../constants";
-import SnowballStatus from "./SnowballStatus";
+import {
+  snowballManagerABI,
+  ercTokenABI,
+  receiptManagerABI,
+  drawingManagerABI,
+  seedManagerABI,
+  contractAddresses,
+} from "../constants";
+import JoinSnowball from "./JoinSnowball";
 import { ethers } from "ethers";
 
 const DisplaySnowball = ({ SnowballID }) => {
@@ -11,160 +18,234 @@ const DisplaySnowball = ({ SnowballID }) => {
   const [timeRemaining, setTimeRemaining] = useState("");
   const [toThreshold, setToThreshold] = useState(null);
   const [nextPayout, setNextPayout] = useState(null);
+  const [excessCustody, setExcessCustody] = useState(null); // State for excess custody
+  const [URIRoot, setURIRoot] = useState("");
+  const [basisPoints, setBasisPoints] = useState("");
 
-  const { runContractFunction: GetSnowball, error } = useWeb3Contract({
-    abi: abi,
-    contractAddress: contractAddresses[wallet.chainId]?.[1],
+  const { runContractFunction: GetSnowball } = useWeb3Contract({
+    abi: snowballManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
     functionName: "getSnowball",
     params: { snowballID: SnowballID },
   });
 
+  const { runContractFunction: GetSnowballParticipants } = useWeb3Contract({
+    abi: snowballManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+    functionName: "getPromotionReceipts",
+    params: { promotionID: SnowballID },
+  });
+
+  const { runContractFunction: CalculateExcessSnowballCustody } =
+    useWeb3Contract({
+      abi: snowballManagerABI,
+      contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+      functionName: "calculateExcessSnowballCustody",
+      params: { snowballID: SnowballID },
+    });
+
+  const { runContractFunction: CancelSnowball } = useWeb3Contract({
+    abi: snowballManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+    functionName: "cancelSnowball",
+    params: { snowballID: SnowballID },
+  });
+
+  const { runContractFunction: RetrieveExcessSnowballCustody } =
+    useWeb3Contract({
+      abi: snowballManagerABI,
+      contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+      functionName: "retrieveExcessSnowballCustody",
+      params: { snowballID: SnowballID },
+    });
+
+  const { runContractFunction: setRoyalty } = useWeb3Contract({
+    abi: snowballManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+    functionName: "setRoyalty",
+    params: {
+      promotionID: SnowballID,
+      basisPoints: basisPoints,
+    },
+  });
+
+  const { runContractFunction: setURI } = useWeb3Contract({
+    abi: snowballManagerABI,
+    contractAddress: contractAddresses[wallet.chainId]?.snowballManager[0],
+    functionName: "setPromotionURI",
+    params: {
+      promotionID: SnowballID,
+      newURIRoot: URIRoot,
+    },
+  });
+
   useEffect(() => {
-    const transactionSending = async () => {
+    const fetchData = async () => {
       try {
         const transaction = await GetSnowball();
+        const participants = await GetSnowballParticipants();
         console.log(transaction);
+        console.log(participants);
+        const maxSlots = transaction.maxSlots.toNumber();
+        const numParticipants = participants.length; //revise
+        console.log(numParticipants);
+        const thresholds = extractThresholds(transaction.thresholds);
+        console.log(1);
+        const cohortPrices = extractCohortPrices(transaction.cohortPrices);
+        console.log(1);
+
+        const payouts = cohortPrices
+          .slice(1)
+          .map((price, index) => -1 * (price - cohortPrices[index]));
+
+        let price = cohortPrices[0];
+        for (let i = 0; i < thresholds.length; i++) {
+          if (numParticipants >= thresholds[i]) {
+            price = cohortPrices[i + 1];
+          } else {
+            break;
+          }
+        }
+        console.log(1);
+
+        const custodyValue = await CalculateExcessSnowballCustody();
+        console.log(custodyValue);
+        setExcessCustody(ethers.utils.formatUnits(custodyValue, 6)); // Store custody value
+        console.log(1);
+
         setSnowballData({
-          id: transaction[0].toNumber(),
-          maxSlots: transaction[1].toNumber(),
-          price: ethers.utils.formatEther(transaction[2]), // Format price as a string
-          duration: transaction[3].toNumber(),
-          payouts: extractPayouts(transaction[4]),
-          thresholds: extractThresholds(transaction[5]),
-          owner: transaction[6],
-          startTime: transaction[7].toNumber(),
-          snowballState: transaction[8].toNumber(),
-          balance: ethers.utils.formatEther(transaction[9]), // Format balance as a string
-          maxDiscount: transaction[10],
-          numParticipants: transaction[11].toNumber(),
+          maxSlots: maxSlots,
+          price: price,
+          thresholds: thresholds,
+          cohortPrices: cohortPrices,
+          payouts: payouts,
+          owner: transaction.owner,
+          endTime: transaction.endTime,
+          custodyBalance: ethers.utils.formatUnits(custodyValue, 6),
+          numParticipants: numParticipants,
+          ID: SnowballID,
         });
       } catch (error) {
         console.log("Error in contract execution:", error);
       }
     };
-    transactionSending();
+
+    fetchData();
   }, [SnowballID]);
 
-  useEffect(() => {
-    if (snowballData) {
-      const endTime = snowballData.startTime + snowballData.duration;
-      const updateRemainingTime = () => {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const remaining = endTime - currentTime;
-
-        const days = Math.floor(remaining / (24 * 60 * 60));
-        const hours = Math.floor((remaining % (24 * 60 * 60)) / (60 * 60));
-        const minutes = Math.floor((remaining % (60 * 60)) / 60);
-
-        setTimeRemaining(
-          `${days} day(s), ${hours} hour(s), ${minutes} minute(s)`
-        );
-      };
-
-      updateRemainingTime();
-      const interval = setInterval(updateRemainingTime, 60000); // Update every minute
-
-      return () => clearInterval(interval);
+  const handleCancelSnowball = async () => {
+    try {
+      await CancelSnowball();
+      alert("Promotion successfully canceled!");
+    } catch (error) {
+      console.error("Error canceling promotion:", error);
     }
-  }, [snowballData]);
-
-  useEffect(() => {
-    if (snowballData) {
-      const { numParticipants, thresholds, payouts } = snowballData;
-      let foundThreshold = null;
-      let foundPayout = null;
-
-      for (let i = 0; i < thresholds.length; i++) {
-        if (thresholds[i] > numParticipants) {
-          foundThreshold = thresholds[i];
-          foundPayout = payouts[i];
-          break;
-        }
-      }
-
-      if (foundThreshold !== null) {
-        setToThreshold(foundThreshold - numParticipants);
-        setNextPayout(foundPayout);
-      }
-    }
-  }, [snowballData]);
-
-  const extractPayouts = (payouts) =>
-    payouts.map((p) => ethers.utils.formatEther(p));
-  const extractThresholds = (thresholds) => thresholds.map((t) => t.toNumber());
-
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp * 1000); // Convert seconds to milliseconds
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-    });
   };
 
-  const formatDuration = (duration) => {
-    const days = Math.floor(duration / (24 * 60 * 60));
-    const hours = Math.floor((duration % (24 * 60 * 60)) / (60 * 60));
-    const minutes = Math.floor((duration % (60 * 60)) / 60);
-    return `${days} day(s), ${hours} hour(s), ${minutes} minute(s)`;
+  const handleRetrieveCustody = async () => {
+    try {
+      await RetrieveExcessSnowballCustody();
+      alert("Excess custody successfully retrieved!");
+    } catch (error) {
+      console.error("Error retrieving excess custody:", error);
+    }
+  };
+
+  const extractCohortPrices = (cohortPrices) =>
+    Object.values(cohortPrices).map((bigNumber) =>
+      parseFloat(ethers.utils.formatUnits(bigNumber, 6))
+    );
+
+  const extractThresholds = (thresholds) =>
+    Object.values(thresholds).map((bigNumber) =>
+      parseInt(bigNumber.toString(), 10)
+    );
+
+  const handleSetRoyalty = async () => {
+    try {
+      await setRoyalty();
+      alert("Royalty updated successfully!");
+    } catch (error) {
+      console.error("Error setting royalty:", error);
+    }
+  };
+
+  const handleSetURI = async () => {
+    try {
+      await setURI();
+      alert("URI updated successfully!");
+    } catch (error) {
+      console.error("Error setting URI:", error);
+    }
   };
 
   return (
     <div>
       <h1>Details for Snowball {SnowballID}</h1>
-      {snowballData && (
-        <>
-          {snowballData.snowballState === 0 ? (
-            <>
+      {snowballData ? (
+        snowballData.startTime === 0 ? (
+          <p>Invalid Snowball ID</p>
+        ) : (
+          <>
+            {snowballData.endTime > Math.floor(Date.now() / 1000) &&
+            snowballData.numParticipants < snowballData.maxSlots ? (
               <p>Time Remaining: {timeRemaining}</p>
-            </>
-          ) : (
-            <p>This snowball has melted!</p>
-          )}
-          <h2>Snowball ID: {snowballData.id}</h2>
-          <p>Max Slots: {snowballData.maxSlots}</p>
-          <p>Current Price: {snowballData.price} ETH</p>
-          <p>Duration: {formatDuration(snowballData.duration)}</p>
-          <p>Owner: {snowballData.owner}</p>
-          <p>Start Time: {formatDate(snowballData.startTime)}</p>
-          <p>
-            End Time:{" "}
-            {formatDate(snowballData.startTime + snowballData.duration)}
-          </p>
-          <p>Snowball State: {snowballData.snowballState}</p>
-          <p>Balance: {snowballData.balance} ETH</p>
-          <p>Max Discount: {snowballData.maxDiscount.toString()}</p>
-          <p>
-            Available Slots Remaining:{" "}
-            {snowballData.maxSlots - snowballData.numParticipants}
-          </p>
-          <h3>Payouts</h3>
-          <ul>
-            {snowballData.payouts.map((payout, index) => (
-              <li key={index}>
-                Step {index + 1}: {payout} ETH
-              </li>
-            ))}
-          </ul>
-          <h3>Thresholds</h3>
-          <ul>
-            {snowballData.thresholds.map((threshold, index) => (
-              <li key={index}>
-                Step {index + 1}: {threshold}
-              </li>
-            ))}
-          </ul>
-          {toThreshold !== null && nextPayout !== null && (
+            ) : (
+              <p>This snowball has melted!</p>
+            )}
+            <h2>Snowball ID: {SnowballID}</h2>
+            <p>Max Slots: {snowballData.maxSlots}</p>
+            <p>Current Price: {snowballData.price} Token</p>
+            <p>Owner: {snowballData.owner}</p>
+            <p>Current Number of Sales: {snowballData.numParticipants}</p>
             <p>
-              {toThreshold} additional purchases needed to save an additional{" "}
-              {nextPayout} ETH!
+              End Time: {new Date(snowballData.endTime * 1000).toLocaleString()}
             </p>
-          )}
-          <SnowballStatus Data={snowballData} />
-        </>
+            <p>Balance: {snowballData.custodyBalance} Token</p>
+            <h3>Thresholds:</h3>
+            <ul>
+              {snowballData.thresholds.map((threshold, index) => (
+                <li key={index}>
+                  Threshold {index + 1}: {threshold}
+                </li>
+              ))}
+            </ul>
+            <h3>Cohort Prices:</h3>
+            <ul>
+              {snowballData.cohortPrices.map((cohortPrice, index) => (
+                <li key={index}>
+                  Price {index + 1}: {cohortPrice}
+                </li>
+              ))}
+            </ul>
+            <p>Excess Custody: {excessCustody} Token</p>
+            <button onClick={handleCancelSnowball}>Cancel Promotion</button>
+            <button onClick={handleRetrieveCustody}>
+              Retrieve Excess Custody
+            </button>
+
+            <h3>Set Royalty (Basis Points):</h3>
+            <input
+              type="number"
+              value={basisPoints}
+              onChange={(e) => setBasisPoints(e.target.value)}
+              placeholder="Enter basis points"
+            />
+            <button onClick={handleSetRoyalty}>Set Royalty</button>
+
+            <h3>Set URI:</h3>
+            <input
+              type="text"
+              value={URIRoot}
+              onChange={(e) => setURIRoot(e.target.value)}
+              placeholder="Enter new URI"
+            />
+            <button onClick={handleSetURI}>Set URI</button>
+            <JoinSnowball Data={snowballData} SnowballID={SnowballID} />
+          </>
+        )
+      ) : (
+        <p>Loading...</p>
       )}
     </div>
   );

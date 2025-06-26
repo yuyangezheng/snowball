@@ -1,0 +1,51 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .label {
+    margin-top: 10px;
+  }
+  
+  .input-field {
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+  
+  .input-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .submit-button {
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #0056b3;
+  }
+
+  .image {
+    max-width: 100%;
+    height: auto;  /* Maintain aspect ratio */
+    max-height: 300px; /* You can adjust the max-height as needed */
+    width: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Ensure the image fits within the container */
+    border-radius: 8px; /* Optional: Add some rounding to the corners */
+  }
